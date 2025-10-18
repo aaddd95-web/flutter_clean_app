@@ -5,24 +5,26 @@ plugins {
 }
 
 android {
-    compileSdk = flutter.compileSdkVersion.toInt()
+    namespace = "com.example.ai_schedule_planner"
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Java 17로 변경 및 desugaring 활성화
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
         applicationId = "com.example.ai_schedule_planner"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion.toInt()
-        versionCode = flutter.versionCode.toInt()
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
@@ -38,5 +40,5 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

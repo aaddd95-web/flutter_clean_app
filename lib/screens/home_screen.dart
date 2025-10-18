@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../utils/colors.dart';
 import '../models/schedule.dart';
 import '../services/schedule_provider.dart';
+import 'package:provider/provider.dart';
+import '../services/theme_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +18,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
+      appBar: AppBar(
+        title: const Text('AI Schedule Planner'),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Provider.of<ThemeProvider>(context).isDarkMode
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -53,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             DateFormat('EEEE, MMMM d').format(now),
             style: const TextStyle(
-              color: Colors.white70,
+              color: Colors.white70,  // 이 부분은 그라데이션 위라 white 유지
               fontSize: 14,
             ),
           ),
@@ -93,9 +111,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ? Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardTheme.color,  // ✅
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [AppColors.cardShadow],
+              boxShadow: [
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkCardShadow
+                    : AppColors.cardShadow
+              ],
             ),
             child: Center(
               child: Column(
@@ -140,17 +162,26 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,  // ✅
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [AppColors.cardShadow],
+        boxShadow: [
+          Theme.of(context).brightness == Brightness.dark
+              ? AppColors.darkCardShadow
+              : AppColors.cardShadow
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Color(schedule.category.color).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).cardTheme.color,  // ✅
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkCardShadow
+                    : AppColors.cardShadow
+              ],
             ),
             child: Icon(
               Icons.access_time,

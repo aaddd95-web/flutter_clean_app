@@ -344,7 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               trailing: Switch(
                 value: themeProvider.isDarkMode,
                 onChanged: (_) {
-                  themeProvider.toggleDarkMode();
+                  themeProvider.toggleTheme();
                 },
                 activeColor: AppColors.primary,
               ),

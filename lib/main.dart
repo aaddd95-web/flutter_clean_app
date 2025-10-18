@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'utils/colors.dart';
+import 'utils/theme.dart';  // 추가
 import 'screens/home_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/ai_chat_screen.dart';
 import 'screens/settings_screen.dart';
 import 'services/schedule_provider.dart';
 import 'services/notification_service.dart';
+import 'services/theme_provider.dart';  // 추가
+import 'screens/onboarding_screen.dart';  // 이 줄만 추가
+import 'package:shared_preferences/shared_preferences.dart';  // 이것도 추가
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,23 +24,54 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<bool> _checkProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('user_profile');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) {
-        final provider = ScheduleProvider();
-        provider.loadSchedules(); // DB에서 불러오기
-        return provider;
-      },
-      child: MaterialApp(
-        title: 'AI Schedule Planner',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: AppColors.primary,
-          scaffoldBackgroundColor: AppColors.background,
-          useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) {
+            final provider = ScheduleProvider();
+            provider.loadSchedules();
+            return provider;
+          },
         ),
-        home: const MainScreen(),
+        ChangeNotifierProvider(
+          create: (context) => ThemeProvider(),
+        ),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'AI Schedule Planner',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+
+            home: FutureBuilder<bool>(
+              future: _checkProfile(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                final hasProfile = snapshot.data ?? false;
+                return hasProfile
+                    ? const MainScreen()
+                    : const OnboardingScreen();
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -61,13 +96,16 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 다크모드 상태 확인
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.1),  // 다크모드 대응
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -81,9 +119,15 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.textSecondary,
+          backgroundColor: isDarkMode
+              ? AppColors.darkCardBackground  // 다크모드 배경
+              : Colors.white,
+          selectedItemColor: isDarkMode
+              ? AppColors.darkPrimary  // 다크모드 선택 색상
+              : AppColors.primary,
+          unselectedItemColor: isDarkMode
+              ? AppColors.darkTextSecondary  // 다크모드 비선택 색상
+              : AppColors.textSecondary,
           selectedLabelStyle: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

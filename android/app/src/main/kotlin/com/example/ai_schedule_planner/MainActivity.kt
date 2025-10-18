@@ -1,4 +1,4 @@
-package com.example.flutter_app
+package com.example.ai_schedule_planner
 
 import io.flutter.embedding.android.FlutterActivity
 
